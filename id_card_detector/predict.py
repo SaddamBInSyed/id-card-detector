@@ -1,14 +1,10 @@
-import cv2
 import torch
-import argparse
 import numpy as np
 from albumentations import (
     Compose,
     Normalize
 )
 from id_card_detector.download_model import download_model
-from id_card_detector.cv_utils import (visualize_prediction, crop_inference_bbox,
-                      		       fit_quads_to_masks, warp_quads_to_rects)
 
 import torchvision
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
@@ -145,58 +141,3 @@ def get_prediction(image: np.array,
 
     return masks, bboxes, classes, scores
 
-
-def instance_segmentation_api(image_path: str,
-                              model_name: str = "maskrcnn_resnet50",
-                              output_dir: str = "output/",
-                              color: tuple = (0, 0, 0)):
-    # read image
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    # get prediction
-    masks, boxes, classes, scores = get_prediction(image,
-                                                   model_name,
-                                                   threshold=0.75)
-
-    # fit quads to predicted masks
-    quads = fit_quads_to_masks(image, masks,
-                               color=color,
-                               output_dir=output_dir)
-
-    # warp quads to rects
-    _ = warp_quads_to_rects(image, quads,
-                            output_dir=output_dir)
-
-    # visualize result
-    visualize_prediction(image, masks, boxes, classes,
-                         rect_th=2,
-                         text_size=0.85,
-                         text_th=2,
-                         color=color,
-                         output_dir=output_dir)
-
-    # crop detected region
-    crop_inference_bbox(image, boxes)
-
-
-if __name__ == '__main__':
-    # construct the argument parser
-    ap = argparse.ArgumentParser()
-
-    # add the arguments to the parser
-    ap.add_argument(
-            "image_path", default="tests/data/idcard2.jpg",
-            help="Path for input image.")
-    ap.add_argument(
-            "model_name", default="maskrcnn_resnet50",
-            help="Name of the instance segmentation model.")
-    ap.add_argument(
-            "output_dir", default="output/",
-            help="Path for output folder that results will be exported.")
-    args = vars(ap.parse_args())
-
-    # perform instance segmentation
-    instance_segmentation_api(image_path=args['image_path'],
-                              model_name=args['model_name'],
-                              output_dir=args['output_dir'])

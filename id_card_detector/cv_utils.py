@@ -7,6 +7,16 @@ import numpy as np
 from id_card_detector.utils import create_dir
 
 
+def read_image(image_path):
+    """
+    Loads image as numpy array from given path.
+    """
+    # read image
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # return image
+    return image
+
 def select_random_color():
     """
     Selects random color.
@@ -39,7 +49,7 @@ def visualize_prediction(image: str,
                          text_th: float = 3,
                          color: tuple = (0, 0, 0),
                          output_dir: str = "output/",
-                         file_name: str = "inference_result"):
+                         file_name: str = "prediction_visual"):
     """
     Visualizes prediction classes, bounding boxes, masks over the source image
     and exports it to output folder.
@@ -73,10 +83,10 @@ def visualize_prediction(image: str,
                 cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
 
-def crop_inference_bbox(image: np.array,
-                        boxes: list,
-                        output_dir: str = "output/",
-                        file_name: str = "cropped_inference_result"):
+def export_predicted_bboxes(image: np.array,
+                            boxes: list,
+                            output_dir: str = "output/",
+                            file_name: str = "warped_detection"):
     """
     Crops the predicted bounding box regions and exports them to output folder.
     """
@@ -151,42 +161,10 @@ def four_point_transform(image, pts):
     return warped
 
 
-def warp_quads_to_rects(image, quads,
-                        output_dir: str = "output/",
-                        file_name: str = "warped"):
+def fit_quads_over_masks(image, masks, verbose: bool = False):
     # deepcopy image so that original is not altered
     image = copy.deepcopy(image)
-    # create output folder if not present
-    create_dir(output_dir)
-    # warp quads to rects
-    warped_rects = []
-    for ind, quad in enumerate(quads):
-        pts = np.array(quad, dtype="float32")
-        # warp four point region to rectangle
-        warped_rect = four_point_transform(image, pts)
-        warped_rects.append(warped_rect)
 
-        # export the warped region
-        save_path = os.path.join(output_dir,
-                                 file_name + "_" + str(ind) + ".png")
-        cv2.imwrite(save_path, cv2.cvtColor(warped_rect, cv2.COLOR_RGB2BGR))
-    # return the warped images
-    return warped_rects
-
-
-def fit_quads_to_masks(image,
-                       masks,
-                       verbose: bool = True,
-                       color: tuple = (0, 0, 0),
-                       output_dir: str = "output/",
-                       file_name: str = "quad_fit"):
-    # deepcopy image so that original is not altered
-    image = copy.deepcopy(image)
-    # create output folder if not present
-    create_dir(output_dir)
-    # select random color if not specified
-    if color == (0, 0, 0):
-        color = select_random_color()
     # fit quads to masks
     quads = []
     for ind, mask in enumerate(masks):
@@ -199,13 +177,69 @@ def fit_quads_to_masks(image,
         quad = [[point_[0], point_[1]] for point in approx for point_ in point]
         quads.append(quad)
 
-        cv2.drawContours(image, [approx], 0, color, 3)
         if verbose:
             print("Simplified contours for mask-{} has {} points."
                   .format(ind, len(approx)))
 
-    # export the image with drawns quads on top of it
-    save_path = os.path.join(output_dir, file_name + ".png")
-    cv2.imwrite(save_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
     # return the fitted quads
     return quads
+
+
+def visualize_quads(image: np.array,
+                    quads: list,
+                    output_dir: str = None,
+                    file_name: str = "quad_visual",
+                    color: tuple = (0, 0, 0)):
+    # deepcopy image so that original is not altered
+    image = copy.deepcopy(image)
+
+    # create output folder if not present
+    create_dir(output_dir)
+    # select random color if not specified
+    if color == (0, 0, 0):
+        color = select_random_color()
+
+    # draw quads over image
+    for quad in quads:
+        # convert to numpy array
+        np_quad = np.array([[pair] for pair in quad])
+        # draw quad
+        cv2.drawContours(image, [np_quad], 0, color, 3)
+
+    # export image if output_dir is given
+    if output_dir is not None:
+        # export the image with drawns quads on top of it
+        save_path = os.path.join(output_dir, file_name + ".png")
+        cv2.imwrite(save_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+
+    # return result
+    return image
+
+
+def unwarp_quads(image: np.array, quads: list):
+    # deepcopy image so that original is not altered
+    image = copy.deepcopy(image)
+
+    # unwarp quads to rects
+    unwarped_quads = []
+    for ind, quad in enumerate(quads):
+        pts = np.array(quad, dtype="float32")
+        # unwarp four point region to rectangle
+        unwarped_quad = four_point_transform(image, pts)
+        unwarped_quads.append(unwarped_quad)
+
+    # return the unwarped quads
+    return unwarped_quads
+
+
+def export_unwarped_quads(unwarped_quads: list,
+                          output_dir: str = "output/",
+                          file_name: str = "unwarped_detection"):
+    # create output folder if not present
+    create_dir(output_dir)
+
+    for ind, unwarped_quad in enumerate(unwarped_quads):
+        # export the unwarped quads
+        save_path = os.path.join(output_dir,
+                                 file_name + "_" + str(ind) + ".png")
+        cv2.imwrite(save_path, cv2.cvtColor(unwarped_quad, cv2.COLOR_RGB2BGR))
