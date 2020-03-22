@@ -1,0 +1,20 @@
+
+name: cardetection
+#prefix: /your/custom/path/envs/cardetkit
+channels:
+  - conda-forge
+  - pytorch
+  - anaconda
+dependencies:
+  - python=3.6
+  - pip=19.3.1
+  - anaconda::cython
+  - pytorch::pytorch>=1.4.0
+  - pytorch::torchvision>=0.5.0
+  - anaconda::jsonschema>=2.6.0
+  - albumentations::albumentations=0.4.5
+  - conda-forge::imgaug=0.4.0
+  - pip:
+    - tqdm
+    - numpy<=1.17.4
+    - scikit-image==0.16.2
