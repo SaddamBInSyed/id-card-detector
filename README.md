@@ -50,32 +50,32 @@ image = card_det.read_image(image_path)
 masks, boxes, classes, scores = card_det.get_prediction(image=image, threshold=0.75)
 
 # export a visual of detected bboxes and masks
-prediction_visual = visualize_prediction(image, masks, boxes, classes,
-                                         rect_th=2,
-                                         text_size=0.85,
-                                         text_th=2,
-                                         color=color,
-                                         output_dir=output_dir)
+prediction_visual = card_det.visualize_prediction(image, masks, boxes, classes,
+                                                  rect_th=2,
+                                           	  text_size=0.85,
+                                         	  text_th=2,
+                                         	  color=color,
+                                         	  output_dir=output_dir)
 
 # export detected bounding boxes
-export_predicted_bboxes(image=image,
-                        boxes=boxes,
-                        output_dir=output_dir)
+card_det.export_predicted_bboxes(image=image,
+                        	 boxes=boxes,
+                        	 output_dir=output_dir)
 
 # fit quads to predicted masks
-quads = fit_quads_over_masks(image, masks)
+quads = card_det.fit_quads_over_masks(image, masks)
 
 # visualize/export quads
-quad_visual = visualize_quads(image=image,
-                              quads=quads,
-                              output_dir=output_dir,
-                              color=color)
+quad_visual = card_det.visualize_quads(image=image,
+				       quads=quads,
+				       output_dir=output_dir,
+                              	       color=color)
 
 # unwarp quads to rects
-unwarped_quads = unwarp_quads(image, quads)
+unwarped_quads = card_det.unwarp_quads(image, quads)
 
 # export unwarped quads
-export_unwarped_quads(unwarped_quads,
-                      output_dir=output_dir)
+card_det.export_unwarped_quads(unwarped_quads,
+                               output_dir=output_dir)
 ```
 
