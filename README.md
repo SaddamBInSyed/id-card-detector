@@ -1,6 +1,6 @@
 
-[![PyPI version](https://badge.fury.io/py/craft-text-detector.svg)](https://badge.fury.io/py/craft-text-detector)
-![CI](https://github.com/fcakyon/craft-text-detector/workflows/CI/badge.svg)
+[![PyPI version](https://badge.fury.io/py/id-card-detector.svg)](https://badge.fury.io/py/id-card-detector)
+![CI](https://github.com/fcakyon/id-card-detector/workflows/CI/badge.svg)
 
 ## ID Card Detector
 Everything you need for ID card detection. Easily perform ID card detection/segmentation, fit quad to detected mask and unwarp the ID card surface to rectangle with Pytorch models on Linux&Windows. Works on all types of ID cards.
