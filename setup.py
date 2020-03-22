@@ -27,11 +27,11 @@ def get_version():
 
 
 setuptools.setup(
-    name="midv500",
+    name="id-card-detector",
     version=get_version(),
     author="Fatih Cagatay Akyon",
     author_email="fatihcagatayakyon@gmail.com",
-    description="Easy ID card detection/segmentation, quad-fit and unwarp",
+    description="Easy ID card detection and unwarping using Pytorch models and OpenCV",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     url="https://github.com/fcakyon/id-card-detector",
